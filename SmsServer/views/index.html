@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Birth Certificate</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9/core.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9/sha256.js"></script>
+	<script src="https://cdn.ethers.io/scripts/ethers-v4.min.js"
+        charset="utf-8"
+        type="text/javascript">
+	</script>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Virtual Birth Certificate</h1>
+
+        <form id="birth-certificate-form">
+            <div class="row">
+                <label class="bold" name="starName">First Name:</label>
+                <input required type="text" name="starName" id="name-input" value="Your Name">
+            </div>
+
+            <div class="row">
+                <label class="bold" name="starStory">Last Name:</label>
+                <input required type="text" name="starStory" id="lastname-input" value="Your Name">
+            </div>
+
+            <div class="row coord">
+                <label class="bold" name="starDec">Birth Date:</label>
+                <input required type="date" name="starDec" id="bdate-input" value="2011-09-29" >
+            </div>
+
+            <div class="row coord">
+                <label class="bold" name="starMag">Birth Place:</label>
+                <input required type="text" name="starMag" id="bplace-input" value="Your Name">
+            </div>
+
+            <div class="row coord">
+                <label class="bold" name="starCent">Mother Name:</label>
+                <input required type="text" name="starCent" id="mother-input" value="Your Name">
+            </div>
+            <div class="row coord">
+                <label class="bold" name="starCent">Father Name:</label>
+                <input required type="text" name="starCent" id="father-input" value="Your Name">
+            </div>
+
+            <button id="claim-button" type="submit">Verify birth certificate</button>
+        </form>
+
+
+    </div>
+    <script>
+		console.log("Hello");
+        document.getElementById("birth-certificate-form").onsubmit = (event) => {
+            event.preventDefault()
+
+            const name     = document.getElementById("name-input").value
+            const lastname = document.getElementById("lastname-input").value
+            const bdate    = document.getElementById("bdate-input").value
+            const bplace   = document.getElementById("bplace-input").value
+            const mother   = document.getElementById("mother-input").value
+            const father   = document.getElementById("father-input").value
+            //const starId = parseInt(document.getElementById("star-id-input").value)
+			var obj     = new Object();
+			obj.name     = name     ;
+			obj.lastname = lastname ;
+			obj.bdate    = bdate    ;
+			obj.bplace   = bplace   ;
+			obj.mother   = mother   ;
+			obj.father   = father   ;
+			
+			var jsonString= JSON.stringify(obj);
+
+			console.log(jsonString);
+			var h = CryptoJS.SHA256(jsonString);
+			console.log(h);
+			ContactContract(h)
+
+        }
+		async function ContactContract(hash)
+		{
+			let provider = new ethers.providers.JsonRpcProvider('http://35.180.74.210:8545/');
+			
+			let privateKey = "d1c26b0ba30df307df618fe365c98bcbcf1f73d9f84b15982c627a19144ced6a";
+            
+            // Connect a wallet to mainnet
+            
+            let wallet = new ethers.Wallet(privateKey, provider);
+            
+            provider.listAccounts().then((accounts) => {
+                let signer = provider.getSigner(accounts[0]);
+                console.log(signer);
+            });
+			let abi = require('./data.json');
+            // The Contract interface
+			
+			let contractAddress = "0x0d4056346C75657782E21025F79e59EE5576F390";
+			let contract = new ethers.Contract(contractAddress, abi, provider);
+			let contractWithSigner = contract.connect(wallet);
+			// Set a new Value, which returns the transaction
+			let tx = await contractWithSigner.setValue("I like turtles.");
+
+			console.log(tx.hash);
+			
+			// The operation is NOT complete yet; we must wait until it is mined
+			await tx.wait();
+			
+			// Call the Contract's getValue() method again
+			let newValue = await contract.getValue();
+			
+			console.log(currentValue);
+            //let data = {
+            //    id: "fb1280c0-d646-4e40-9550-7026b1be504a",
+            //    address: "88a5c2d9919e46f883eb62f7b8dd9d0cc45bc290",
+            //    Crypto: {
+            //        kdfparams: {
+            //            dklen: 32,
+            //            p: 1,
+            //            salt: "bbfa53547e3e3bfcc9786a2cbef8504a5031d82734ecef02153e29daeed658fd",
+            //            r: 8,
+            //            n: 262144
+            //        },
+            //        kdf: "scrypt",
+            //        ciphertext: "10adcc8bcaf49474c6710460e0dc974331f71ee4c7baa7314b4a23d25fd6c406",
+            //        mac: "1cf53b5ae8d75f8c037b453e7c3c61b010225d916768a6b145adf5cf9cb3a703",
+            //        cipher: "aes-128-ctr",
+            //        cipherparams: {
+            //            iv: "9wmxdHhlqAEYTEb"
+            //         }
+            //    },
+			//	
+            //    "version" : 3
+            //};
+            //
+            //let json = JSON.stringify(data);
+			//console.log(json);
+            //let password = "9wmxdHhlqAEYTEb";
+            //
+            //ethers.Wallet.fromEncryptedJson(json, password).then(function(wallet) {
+            //    console.log("Address: " + wallet.address);
+            //});
+		}
+
+    </script>
+</body>
+
+</html>

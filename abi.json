@@ -3,9 +3,9 @@
         "constant": false,
         "inputs": [
             {
-                "internalType": "string",
+                "internalType": "bytes32",
                 "name": "hash",
-                "type": "string"
+                "type": "bytes32"
             }
         ],
         "name": "add_acte",
@@ -60,9 +60,9 @@
         "constant": true,
         "inputs": [
             {
-                "internalType": "string",
+                "internalType": "bytes32",
                 "name": "hash",
-                "type": "string"
+                "type": "bytes32"
             }
         ],
         "name": "get_acte",
@@ -81,9 +81,9 @@
         "constant": true,
         "inputs": [
             {
-                "internalType": "string",
+                "internalType": "bytes32",
                 "name": "",
-                "type": "string"
+                "type": "bytes32"
             }
         ],
         "name": "info",
@@ -130,3 +130,4 @@
         "type": "function"
     }
 ]
+

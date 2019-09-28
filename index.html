@@ -11,6 +11,8 @@
         charset="utf-8"
         type="text/javascript">
 	</script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+
 </head>
 
 <body>
@@ -95,60 +97,62 @@
                 let signer = provider.getSigner(accounts[0]);
                 console.log(signer);
             });
-            // The Contract interface
-			let abi = [
-				"event ValueChanged(address indexed author, string oldValue, string newValue)",
-				"constructor(string value)",
-				"function getValue() view returns (string value)",
-				"function setValue(string value)"
-			];
-			let contractAddress = "0x2bD9aAa2953F988153c8629926D22A6a5F69b14E";
-			let contract = new ethers.Contract(contractAddress, abi, provider);
-			let contractWithSigner = contract.connect(wallet);
-			// Set a new Value, which returns the transaction
-			let tx = await contractWithSigner.setValue("I like turtles.");
-
-			// See: https://ropsten.etherscan.io/tx/0xaf0068dcf728afa5accd02172867627da4e6f946dfb8174a7be31f01b11d5364
-			console.log(tx.hash);
-			// "0xaf0068dcf728afa5accd02172867627da4e6f946dfb8174a7be31f01b11d5364"
-			
-			// The operation is NOT complete yet; we must wait until it is mined
-			await tx.wait();
-			
-			// Call the Contract's getValue() method again
-			let newValue = await contract.getValue();
-			
-			console.log(currentValue);
-            let data = {
-                id: "fb1280c0-d646-4e40-9550-7026b1be504a",
-                address: "88a5c2d9919e46f883eb62f7b8dd9d0cc45bc290",
-                Crypto: {
-                    kdfparams: {
-                        dklen: 32,
-                        p: 1,
-                        salt: "bbfa53547e3e3bfcc9786a2cbef8504a5031d82734ecef02153e29daeed658fd",
-                        r: 8,
-                        n: 262144
-                    },
-                    kdf: "scrypt",
-                    ciphertext: "10adcc8bcaf49474c6710460e0dc974331f71ee4c7baa7314b4a23d25fd6c406",
-                    mac: "1cf53b5ae8d75f8c037b453e7c3c61b010225d916768a6b145adf5cf9cb3a703",
-                    cipher: "aes-128-ctr",
-                    cipherparams: {
-                        iv: "9wmxdHhlqAEYTEb"
-                     }
-                },
+			//var re = new RegExp("[a-zA-Z0-9]{64}");
+			console.log(hash.toString())
+			if(!hash.toString().match(/^([0-9a-z]){64}$/)){
+				alert("Unkown message format please re-enter data")
+				return;
+			}
 				
-                "version" : 3
-            };
-            
-            let json = JSON.stringify(data);
-			console.log(json);
-            let password = "9wmxdHhlqAEYTEb";
-            
-            ethers.Wallet.fromEncryptedJson(json, password).then(function(wallet) {
-                console.log("Address: " + wallet.address);
-            });
+			$.getJSON("abi.json", async function(json) {
+				console.log(tx.hash);
+				let abi = json
+				// The Contract interface
+				
+				let contractAddress = "0x0d4056346C75657782E21025F79e59EE5576F390";
+				let contract = new ethers.Contract(contractAddress, abi, provider);
+				let contractWithSigner = contract.connect(wallet);
+				// Set a new Value, which returns the transaction
+				let tx = await contractWithSigner.setValue("");
+				// The operation is NOT complete yet; we must wait until it is mined
+				await tx.wait();
+				
+				// Call the Contract's getValue() method again
+				let newValue = await contract.getValue();
+				
+				console.log(currentValue);
+			});
+			
+            //let data = {
+            //    id: "fb1280c0-d646-4e40-9550-7026b1be504a",
+            //    address: "88a5c2d9919e46f883eb62f7b8dd9d0cc45bc290",
+            //    Crypto: {
+            //        kdfparams: {
+            //            dklen: 32,
+            //            p: 1,
+            //            salt: "bbfa53547e3e3bfcc9786a2cbef8504a5031d82734ecef02153e29daeed658fd",
+            //            r: 8,
+            //            n: 262144
+            //        },
+            //        kdf: "scrypt",
+            //        ciphertext: "10adcc8bcaf49474c6710460e0dc974331f71ee4c7baa7314b4a23d25fd6c406",
+            //        mac: "1cf53b5ae8d75f8c037b453e7c3c61b010225d916768a6b145adf5cf9cb3a703",
+            //        cipher: "aes-128-ctr",
+            //        cipherparams: {
+            //            iv: "9wmxdHhlqAEYTEb"
+            //         }
+            //    },
+			//	
+            //    "version" : 3
+            //};
+            //
+            //let json = JSON.stringify(data);
+			//console.log(json);
+            //let password = "9wmxdHhlqAEYTEb";
+            //
+            //ethers.Wallet.fromEncryptedJson(json, password).then(function(wallet) {
+            //    console.log("Address: " + wallet.address);
+            //});
 		}
 
     </script>

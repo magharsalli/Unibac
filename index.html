@@ -5,14 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Birth Certificate</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9/core.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9/sha256.js"></script>
-	<script src="https://cdn.ethers.io/scripts/ethers-v4.min.js"
+    <script src="https://cdn.ethers.io/scripts/ethers-v4.min.js"
         charset="utf-8"
         type="text/javascript">
-	</script>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-
+</script>
+<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 
 <body>
@@ -20,142 +21,255 @@
 
         <h1>Virtual Birth Certificate</h1>
 
-        <form id="birth-certificate-form">
-            <div class="row">
-                <label class="bold" name="starName">First Name:</label>
-                <input required type="text" name="starName" id="name-input" value="Your Name">
-            </div>
+	<div class="form-group">
+		<label for="usr">First name:</label>
+		<input type="text" class="form-control" id="name">
+	</div>
+	<div class="form-group">
+		<label for="usr">Last name:</label>
+		<input type="text" class="form-control" id="lastname">
+	</div>
+	<div class="md-form">
+		<label for="date-picker-example">Birth date:</label>
+		<input required type="date" name="starDec" id="bdate">
+	</div>
+	<div class="form-group">
+		<label for="usr">Birth place:</label>
+		<input type="text" class="form-control" id="bplace">
+	</div>
+	<div class="form-group">
+		<label for="usr">Mother name:</label>
+		<input type="text" class="form-control" id="mother">
+	</div>
+	<div class="form-group">
+		<label for="usr">Father name:</label>
+		<input type="text" class="form-control" id="father">
+	</div>
 
-            <div class="row">
-                <label class="bold" name="starStory">Last Name:</label>
-                <input required type="text" name="starStory" id="lastname-input" value="Your Name">
-            </div>
+	<div>
+		<button onclick="createBytes('create')"  class="btn btn-primary">Add birth certificate</button>
+    <button onclick="createBytes('verify')"  class="btn btn-primary">Verify birth certificate</button>
 
-            <div class="row coord">
-                <label class="bold" name="starDec">Birth Date:</label>
-                <input required type="date" name="starDec" id="bdate-input" value="2011-09-29" >
-            </div>
+	</div>
+  <h1>QR</h1>
+  <div id="qrcode"></div>
+</div>
 
-            <div class="row coord">
-                <label class="bold" name="starMag">Birth Place:</label>
-                <input required type="text" name="starMag" id="bplace-input" value="Your Name">
-            </div>
-
-            <div class="row coord">
-                <label class="bold" name="starCent">Mother Name:</label>
-                <input required type="text" name="starCent" id="mother-input" value="Your Name">
-            </div>
-            <div class="row coord">
-                <label class="bold" name="starCent">Father Name:</label>
-                <input required type="text" name="starCent" id="father-input" value="Your Name">
-            </div>
-
-            <button id="claim-button" type="submit">Verify birth certificate</button>
-        </form>
-
-
-    </div>
     <script>
-		console.log("Hello");
-        document.getElementById("birth-certificate-form").onsubmit = (event) => {
-            event.preventDefault()
+		function createBytes(arg) {
+			var acte = {
+				name		:$("#name").val(),
+				lastename	:$("#lastname").val(),
+				bdate		:$("#bdate").val(),
+				bplace		:$("#bplace").val(),
+				mother		:$("#mother").val(),
+				father		:$("#father").val()
+			};
+			var jsonString= JSON.stringify(acte);
+			var crypterString = CryptoJS.SHA256(jsonString);
+      var crypterBytes32 = '0x' + crypterString.toString();
 
-            const name     = document.getElementById("name-input").value
-            const lastname = document.getElementById("lastname-input").value
-            const bdate    = document.getElementById("bdate-input").value
-            const bplace   = document.getElementById("bplace-input").value
-            const mother   = document.getElementById("mother-input").value
-            const father   = document.getElementById("father-input").value
-            //const starId = parseInt(document.getElementById("star-id-input").value)
-			var obj     = new Object();
-			obj.name     = name     ;
-			obj.lastname = lastname ;
-			obj.bdate    = bdate    ;
-			obj.bplace   = bplace   ;
-			obj.mother   = mother   ;
-			obj.father   = father   ;
-			
-			var jsonString= JSON.stringify(obj);
 
-			console.log(jsonString);
-			var h = CryptoJS.SHA256(jsonString);
-			console.log(h);
-			ContactContract(h)
+      if (arg == 'create') {
+        createActe(crypterBytes32);
+        console.log(crypterBytes32);
+      }
+      if (arg == 'verify') {
+        verifActe(crypterBytes32);
+        console.log(crypterBytes32);
+      }
+			//alert(crypterString);
+		};
 
-        }
-		async function ContactContract(hash)
-		{
-			let provider = new ethers.providers.JsonRpcProvider('http://35.180.74.210:8545/');
-			
-			let privateKey = "d1c26b0ba30df307df618fe365c98bcbcf1f73d9f84b15982c627a19144ced6a";
-            
-            // Connect a wallet to mainnet
-            
-            let wallet = new ethers.Wallet(privateKey, provider);
-            
-            provider.listAccounts().then((accounts) => {
-                let signer = provider.getSigner(accounts[0]);
-                console.log(signer);
-            });
-			//var re = new RegExp("[a-zA-Z0-9]{64}");
-			console.log(hash.toString())
-			if(!hash.toString().match(/^([0-9a-z]){64}$/)){
-				alert("Unkown message format please re-enter data")
-				return;
+    var unibacABI = [
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
 			}
-				
-			$.getJSON("abi.json", async function(json) {
-				console.log(tx.hash);
-				let abi = json
-				// The Contract interface
-				
-				let contractAddress = "0xa7EF681210C4e1033E2149Ab2a6C5339A21D41C7";
-				let contract = new ethers.Contract(contractAddress, abi, provider);
-				let contractWithSigner = contract.connect(wallet);
-				// Set a new Value, which returns the transaction
-				let tx = await contractWithSigner.setValue("");
-				// The operation is NOT complete yet; we must wait until it is mined
-				await tx.wait();
-				
-				// Call the Contract's getValue() method again
-				let newValue = await contract.getValue();
-				
-				console.log(currentValue);
-			});
-			
-            //let data = {
-            //    id: "fb1280c0-d646-4e40-9550-7026b1be504a",
-            //    address: "88a5c2d9919e46f883eb62f7b8dd9d0cc45bc290",
-            //    Crypto: {
-            //        kdfparams: {
-            //            dklen: 32,
-            //            p: 1,
-            //            salt: "bbfa53547e3e3bfcc9786a2cbef8504a5031d82734ecef02153e29daeed658fd",
-            //            r: 8,
-            //            n: 262144
-            //        },
-            //        kdf: "scrypt",
-            //        ciphertext: "10adcc8bcaf49474c6710460e0dc974331f71ee4c7baa7314b4a23d25fd6c406",
-            //        mac: "1cf53b5ae8d75f8c037b453e7c3c61b010225d916768a6b145adf5cf9cb3a703",
-            //        cipher: "aes-128-ctr",
-            //        cipherparams: {
-            //            iv: "9wmxdHhlqAEYTEb"
-            //         }
-            //    },
-			//	
-            //    "version" : 3
-            //};
-            //
-            //let json = JSON.stringify(data);
-			//console.log(json);
-            //let password = "9wmxdHhlqAEYTEb";
-            //
-            //ethers.Wallet.fromEncryptedJson(json, password).then(function(wallet) {
-            //    console.log("Address: " + wallet.address);
-            //});
-		}
+		],
+		"name": "add_acte",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "set_validator_name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "set_validator_location",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "set_validator_address",
+				"type": "address"
+			}
+		],
+		"name": "add_validator",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "set_government_name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "set_government_location",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
+			}
+		],
+		"name": "get_acte",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_validatorAddress",
+				"type": "address"
+			}
+		],
+		"name": "is_validator",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "map_hash_acte",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "validators",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
 
-    </script>
+    let overrides = {gasLimit: 800000, gasPrice: ethers.utils.parseUnits('9.0', 'gwei')};
+
+    //let provider = ethers.getDefaultProvider('ropsten');
+    let provider = ethers.getDefaultProvider('ropsten');
+
+    var addressUnibac = '0xa1e250F729565D719C75a393a7e993D6A62D2d13';
+
+    // Load the wallet to deploy the contract with
+    let privateKey = 'D1C26B0BA30DF307DF618FE365C98BCBCF1F73D9F84B15982C627A19144CED6A';
+    let wallet = new ethers.Wallet(privateKey, provider);
+    var unibacContract = new ethers.Contract(addressUnibac, unibacABI, wallet);
+    //
+    // var hhh = "0x7845ef5b2694e4ab5dd0ff60d91edba8bc21739c58bdcda0b50bfb702f2726c7";
+    // unibacContract.get_acte('0x7845ef5b2694e4ab5dd0ff60d91edba8bc21739c58bdcda0b50bfb702f2726c7').then(result => {
+    //   console.log(result);
+    // })
+
+    //unibacContract.get_acte(hhh).then(result => console.log(result));
+
+
+    var qrcode = new QRCode("qrcode");
+
+    function createActe(crypterBytes32) {
+
+      unibacContract.add_acte(crypterBytes32, overrides).then(result => {
+        console.log(result);
+        qrcode.makeCode(result);
+      })
+    }
+
+
+    function verifActe(crypterBytes32) {
+      unibacContract.get_acte(crypterBytes32).then(result => console.log(result));
+    }
+	</script>
 </body>
 
 </html>

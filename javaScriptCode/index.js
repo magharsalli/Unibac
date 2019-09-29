@@ -2,13 +2,15 @@ const express = require('express')
 const app = express();
 const ethers = require('ethers')
 
-let provider = ethers.getDefaultProvider('ropsten');
+let provider = let defaultProvider = ethers.getDefaultProvider('ropsten');
 
-var addressUnibac = '0x0AA1640a9b0A868d35675d3aBf1190aE8b087d99';
+var addressUnibac = '0x692a70D2e424a56D2C6C27aA97D1a86395877b3A';
 
 // Load the wallet to deploy the contract with
 let privateKey = 'D1C26B0BA30DF307DF618FE365C98BCBCF1F73D9F84B15982C627A19144CED6A';
 let wallet = new ethers.Wallet(privateKey, provider);
+var unibacContract = new ethers.Contract(addressUnibac, unibacABI, wallet);
+
 
 var unibacABI = [
 	{
@@ -164,13 +166,14 @@ var unibacABI = [
 	}
 ];
 
-var unibacContract = new ethers.Contract(addressUnibac, unibacABI, wallet);
+//unibacContract.is_validator('0x0b3dE286BE378E98D163dD1Cb753234721d753Da').then(result => console.log(result));
 
-unibacContract.is_validator('0x0b3dE286BE378E98D163dD1Cb753234721d753Da').then(result => console.log(result));
 
-//unibacContract.add_acte('0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCCd').then(result => console.log(result));
+function createActe() {
+  unibacContract.add_acte('0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCCf').then(result => console.log(result));
+}
 
-unibacContract.get_acte('0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCCd').then(result => console.log(result));
+//unibacContract.get_acte('0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCCd').then(result => console.log(result));
 
 //unibacContract.set('10').then(result => console.log(result));
 

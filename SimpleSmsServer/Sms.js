@@ -2,25 +2,24 @@
 
 
    import React, { Component } from 'react';
-   import { Text, View } from 'react-native';
+   import { Text, View, Alert } from 'react-native';
 
    export default class SimpleSmsListener extends Component {
 
   	constructor(props){
       super(props);
       this.state ={ isLoading: true}
-    }
-
-	componentDidMount() {
-		this.state.isLoading = true;
-		SmsListener.addListener(message => {
-			console.info(message);
-			isLoading = false;
-			let request = JSON.parse(msg);
-			request.phoneNumber = message.originatingAddress;
-			alert(request);
+	  SmsListener.addListener(message => {
+			try{
+				let request = message.body;
+				request.phoneNumber = message.originatingAddress;
+				Alert.alert('Received JSON Message !', JSON.stringify(request).toString());
+			}catch(e){
+				Alert.alert("Unknown message format",e);
+			}
+			
 		});
-	}
+    }
 
 
      render() {
